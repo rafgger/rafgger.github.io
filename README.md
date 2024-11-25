@@ -1,1 +1,32 @@
-# rafgger-github.io
+# Sales
+
+<table>
+    <thead>
+        <tr>
+            <th>Country</th>
+            <th>Toyota</th>
+            <th>Ford</th>
+            <th>Subaru</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Canada</td>
+            <td>10</td>
+            <td>8</td>
+            <td>9</td>
+        </tr>
+        <tr>
+            <td>Australia</td>
+            <td>12</td>
+            <td>14</td>
+            <td>8</td>
+        </tr>
+        <tr>
+            <td>UK</td>
+            <td>13</td>
+            <td>12</td>
+            <td>11</td>
+        </tr>
+    </tbody>
+</table>
