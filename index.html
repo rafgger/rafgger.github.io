@@ -1,19 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trend Chart</title>
-  <style>
-    /* Add your CSS here if necessary or keep using insert-css */
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Price Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
-  <div id="container"></div>
-  <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@antv/g2plot/dist/g2plot.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>
-  <script src="trend-chart.js" type="module"></script>
+    <h1>Live Bitcoin Price Chart</h1>
+    <canvas id="bitcoinChart" width="800" height="400"></canvas>
+    <script>
+        const ctx = document.getElementById('bitcoinChart').getContext('2d');
+        let bitcoinChart;
+
+        // Fetch data from CoinGecko API
+        async function fetchBitcoinData() {
+            const endTime = Math.floor(Date.now() / 1000);
+            const startTime = endTime - (2 * 24 * 60 * 60); // Past 2 days in seconds
+
+            const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${startTime}&to=${endTime}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+            const prices = data.prices;
+
+            return prices.map(([timestamp, price]) => ({
+                time: new Date(timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                price
+            }));
+        }
+
+        // Update chart
+        async function updateChart() {
+            const bitcoinData = await fetchBitcoinData();
+            const labels = bitcoinData.map(data => data.time);
+            const prices = bitcoinData.map(data => data.price);
+
+            if (bitcoinChart) {
+                bitcoinChart.data.labels = labels;
+                bitcoinChart.data.datasets[0].data = prices;
+                bitcoinChart.update();
+            } else {
+                bitcoinChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Bitcoin Price (USD)',
+                            data: prices,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                            },
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Price (USD)'
+                                },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Refresh chart every minute
+        setInterval(updateChart, 60000);
+        updateChart(); // Initial call
+    </script>
 </body>
 </html>
